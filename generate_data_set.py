@@ -57,13 +57,13 @@ def get_joint_angles(files, indecies, sides):
     #     angles2["ankle"].append(signal.resample(angles["ankle"][i], sample_size))
 
     for i in range(len(files)):
-        angles2["Lhip"].append(angles["hip"][i])
-        angles2["Lknee"].append(angles["knee"][i])
-        angles2["Lankle"].append(angles["ankle"][i])
+        angles2["Lhip"].append(np.rad2deg(angles["hip"][i]))
+        angles2["Lknee"].append( np.rad2deg(angles["knee"][i]))
+        angles2["Lankle"].append(np.rad2deg(angles["ankle"][i]))
 
-        angles2["Rhip"].append(np.flip(angles["hip"][i]))
-        angles2["Rknee"].append(np.flip(angles["knee"][i]))
-        angles2["Rankle"].append(np.flip(angles["ankle"][i]))
+        angles2["Rhip"].append( np.rad2deg(np.flip(angles["hip"][i])))
+        angles2["Rknee"].append( np.rad2deg(np.flip(angles["knee"][i])))
+        angles2["Rankle"].append(np.rad2deg(np.flip(angles["ankle"][i])))
 
     return angles2
 
