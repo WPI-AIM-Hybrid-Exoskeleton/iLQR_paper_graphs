@@ -57,13 +57,13 @@ def get_joint_angles(files, indecies, sides):
     #     angles2["ankle"].append(signal.resample(angles["ankle"][i], sample_size))
 
     for i in range(len(files)):
-        angles2["Lhip"].append(np.rad2deg(angles["hip"][i]))
-        angles2["Lknee"].append( np.rad2deg(angles["knee"][i]))
-        angles2["Lankle"].append(np.rad2deg(angles["ankle"][i]))
+        angles2["Lhip"].append(np.deg2rad(angles["hip"][i]))
+        angles2["Lknee"].append( np.deg2rad(angles["knee"][i]))
+        angles2["Lankle"].append( -(np.deg2rad(angles["ankle"][i])) )
 
-        angles2["Rhip"].append( np.rad2deg(np.flip(angles["hip"][i])))
-        angles2["Rknee"].append( np.rad2deg(np.flip(angles["knee"][i])))
-        angles2["Rankle"].append(np.rad2deg(np.flip(angles["ankle"][i])))
+        angles2["Rhip"].append( np.deg2rad(np.flip(angles["hip"][i])))
+        angles2["Rknee"].append( np.deg2rad(np.flip(angles["knee"][i])))
+        angles2["Rankle"].append(np.deg2rad(np.flip(angles["ankle"][i])))
 
     return angles2
 
@@ -117,7 +117,7 @@ def get_data():
     #
     # trainer = TPGMMTrainer.TPGMMTrainer(demo=traj, file_name="leg", n_rf=15, dt=0.01, reg=[1e-5, 1e-7, 1e-7], poly_degree=[20, 20, 20])
     # trainer.train()
-    # runner = TPGMMRunner.TPGMMRunner("leg.pickle")
+    # runner = TPGMMRunner.TPGMMRunner("walk2.pickle")
     # path = np.array(runner.run())
 #
 #     fig, (ax1, ax2, ax3) = plt.subplots(3, 1)

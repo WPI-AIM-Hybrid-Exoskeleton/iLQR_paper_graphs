@@ -202,4 +202,4 @@ dmypy.json
 .idea/modules.xml
 .idea/ros.xml
 .idea/vcs.xml
-leg.pickle
+walk2.pickle
