@@ -9,7 +9,8 @@ from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
 import numpy as np
 import matplotlib
-
+from dtw import dtw
+import numpy.polynomial.polynomial as poly
 
 def gen_traj(file_name=None):
     angles = get_data()
@@ -83,7 +84,7 @@ def plot_gmm(Mu, Sigma, ax=None):
 def get_gmm(file_name):
     font = {'family': 'normal',
             'weight': 'bold',
-            'size': 22}
+            'size': 30}
 
     matplotlib.rc('font', **font)
 
@@ -138,18 +139,70 @@ def get_gmm(file_name):
     plt.show()
 
 
-def train_model(file_name):
+def train_model(file_name, bins=15, save=True):
     angles = get_data()
     traj = [angles["Lhip"], angles["Lknee"], angles["Lankle"], angles["Rhip"], angles["Rknee"], angles["Rankle"]]
-    trainer = TPGMMTrainer.TPGMMTrainer(demo=traj, file_name=file_name, n_rf=20, dt=0.01, reg=[1e-3, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3],
-                                                                                               poly_degree=[6, 6, 6, 6, 6, 6])
-    trainer.train()
+    trainer = TPGMMTrainer.TPGMMTrainer(demo=traj, file_name=file_name, n_rf=bins, dt=0.01, reg=[1e-3, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3],
+                                                                                               poly_degree=[20, 20, 20, 20, 20, 20])
+    return trainer.train(save)
 
 
+def get_BIC(file_name):
+
+    font = {'family': 'normal',
+            'weight': 'bold',
+            'size': 30}
+
+    matplotlib.rc('font', **font)
+
+    for j in range(30):
+        BIC = {}
+        for i in range(5,30):
+            data = train_model(file_name, bins=i, save=False)
+            BIC[i] = data["BIC"]
+
+        plt.plot(list(BIC.keys()), list(BIC.values()))
+
+    plt.xlabel("Bins")
+    plt.ylabel("BIC")
+    plt.title("BIC score for Walking")
+    plt.show()
+
+
+def calculate_imitation_metric(file_name):
+    demos = get_data()
+    runner = TPGMMRunner.TPGMMRunner(file_name)
+    path = runner.run()
+    T = len(path[:,0])
+    M = len(demos)
+    # T = len(imitation)
+    # imitation = np.array(imitation)
+    metric = 0.0
+    paths = []
+    t = []
+    t.append(1.0)
+    alpha = 1.0
+    manhattan_distance = lambda x, y: abs(x - y)
+    for i in range(1, T):
+        t.append(t[i - 1] - alpha * t[i - 1] * 0.01)  # Update of decay term (ds/dt=-alpha s) )
+    t = np.array(t)
+
+    # for m in range(M):
+    #     d, cost_matrix, acc_cost_matrix, path = dtw(imitation, demos[m], dist=manhattan_distance)
+    #     data_warp = [demos[m][path[1]][:imitation.shape[0]]]
+    #     coefs = poly.polyfit(t, data_warp[0], 20)
+    #     ffit = poly.Polynomial(coefs)
+    #     y_fit = ffit(t)
+    #     paths.append(y_fit)
+    #     metric += np.sum(abs(y_fit - imitation.flatten()))
+    #
+    # return paths, metric/(M*T)
 
 if __name__ == "__main__":
-    train_model("walk2")
-    gen_traj("walk2")
-    # get_gmm("walk2.pickle")
+    #train_model("walk2")
+    #get_BIC("walk2")
+    #gen_traj("walk2")
+    #get_gmm("walk2.pickle")
+    calculate_imitation_metric("walk2.pickle")
     # train_model("leg")
     # compare_model("leg")
