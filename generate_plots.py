@@ -170,39 +170,46 @@ def get_BIC(file_name):
 
 
 def calculate_imitation_metric(file_name):
-    demos = get_data()
+    angles = get_data()
+    demos = [angles["Lhip"], angles["Lknee"], angles["Lankle"]]
     runner = TPGMMRunner.TPGMMRunner(file_name)
     path = runner.run()
-    T = len(path[:,0])
-    M = len(demos)
-    # T = len(imitation)
-    # imitation = np.array(imitation)
-    metric = 0.0
-    paths = []
-    t = []
-    t.append(1.0)
+    print(path[:,0])
+
+
     alpha = 1.0
     manhattan_distance = lambda x, y: abs(x - y)
-    for i in range(1, T):
-        t.append(t[i - 1] - alpha * t[i - 1] * 0.01)  # Update of decay term (ds/dt=-alpha s) )
-    t = np.array(t)
 
-    # for m in range(M):
-    #     d, cost_matrix, acc_cost_matrix, path = dtw(imitation, demos[m], dist=manhattan_distance)
-    #     data_warp = [demos[m][path[1]][:imitation.shape[0]]]
-    #     coefs = poly.polyfit(t, data_warp[0], 20)
-    #     ffit = poly.Polynomial(coefs)
-    #     y_fit = ffit(t)
-    #     paths.append(y_fit)
-    #     metric += np.sum(abs(y_fit - imitation.flatten()))
-    #
-    # return paths, metric/(M*T)
+    costs = []
+    for i in range(3):
+        imitation = path[:, i]
+        T = len(imitation)
+        M = len(demos[i])
+        metric = 0.0
+        t = []
+        t.append(1.0)
+        for k in range(1, T):
+            t.append(t[k - 1] - alpha * t[k - 1] * 0.01)  # Update of decay term (ds/dt=-alpha s) )
+        t = np.array(t)
+
+        for m in range(M):
+            d, cost_matrix, acc_cost_matrix, path_im = dtw(imitation, demos[i][m], dist=manhattan_distance)
+            data_warp = [demos[i][m][path_im[1]][:imitation.shape[0]]]
+            coefs = poly.polyfit(t, data_warp[0], 20)
+            ffit = poly.Polynomial(coefs)
+            y_fit = ffit(t)
+            metric += np.sum(abs(y_fit - imitation.flatten()))
+
+        costs.append(metric / (M * T))
+        print("cost ")
+        print(costs)
+    return costs
 
 if __name__ == "__main__":
     #train_model("walk2")
     #get_BIC("walk2")
     #gen_traj("walk2")
     #get_gmm("walk2.pickle")
-    calculate_imitation_metric("walk2.pickle")
+    #calculate_imitation_metric("walk2.pickle")
     # train_model("leg")
     # compare_model("leg")
